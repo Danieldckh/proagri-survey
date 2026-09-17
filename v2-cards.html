@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Client Check-in Survey — Cards</title>
+  <!--
+    THESIS: One question on a stacked card. Yellow Next is the only loud object.
+    OWN-WORLD: Navy-mist field, white 32px cards, red dashes, yellow pill CTA, Poppins question.
+    STORY: Five short beats — leads, content, ROI, one win, call or not.
+    FIRST VIEWPORT: Stacked paper, QUESTION 01, radios, Back + yellow Next.
+    FORM: The sage-card reference restated in ProAgriMedia CI (yellow in place of lime; no green).
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red: #f03340;
+      --navy: #1c365c;
+      --ink: #212421;
+      --yellow: #ffbf40;
+      --field: #dfe4ec;
+      --muted: #6a7380;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    body {
+      font-family: "Roboto", system-ui, sans-serif;
+      background: var(--field);
+      color: var(--ink);
+      height: 100dvh;
+      max-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 16px 12px;
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        url("assets/matrix.svg") right -8% top -12% / 56vmax no-repeat;
+      opacity: 0.045;
+      pointer-events: none;
+      filter: grayscale(1);
+    }
+    .stage {
+      position: relative;
+      width: min(420px, 100%);
+      max-height: 100%;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .stack {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .ghost {
+      position: absolute;
+      inset: 14px -12px auto;
+      height: 88%;
+      background: #fff;
+      border-radius: 32px;
+      transform: rotate(3.4deg);
+      box-shadow: 0 18px 40px -22px rgb(28 54 92 / 0.35);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .ghost.b {
+      inset: 8px -6px auto;
+      transform: rotate(-2.2deg);
+      opacity: 0.92;
+    }
+    .card {
+      position: relative;
+      z-index: 2;
+      background: #fff;
+      border-radius: 32px;
+      padding: 16px 22px 14px;
+      min-height: 0;
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 28px 60px -24px rgb(28 54 92 / 0.32);
+      overflow: hidden;
+    }
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-shrink: 0;
+    }
+    .dashes {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+    }
+    .dashes i {
+      display: block;
+      height: 5px;
+      flex: 1;
+      max-width: 36px;
+      border-radius: 99px;
+      background: #e6e9ee;
+    }
+    .dashes i.on { background: var(--navy); }
+    .dashes i.now { background: var(--red); }
+    .close {
+      width: 36px; height: 36px;
+      border: 0;
+      background: transparent;
+      color: var(--navy);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+    .close:hover { background: #f3f5f8; }
+    .kicker {
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      font-weight: 500;
+      color: var(--muted);
+      margin: 0 0 10px;
+    }
+    h1 {
+      font-family: "Poppins", sans-serif;
+      font-size: clamp(18px, 2.6vh, 24px);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.22;
+      margin: 0 0 6px;
+      color: var(--navy);
+    }
+    .hint {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      color: #9aa3ae;
+      margin: 10px 0 8px;
+      font-weight: 500;
+    }
+    .opts { display: grid; gap: 0; }
+    .opt {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-height: 40px;
+      cursor: pointer;
+    }
+    .opt input { position: absolute; opacity: 0; pointer-events: none; }
+    .ring {
+      width: 22px; height: 22px; flex: 0 0 22px;
+      border-radius: 50%;
+      border: 1.6px solid #c9ced6;
+      position: relative;
+      background: #fff;
+    }
+    .opt input:checked + .ring {
+      border-color: var(--red);
+    }
+    .opt input:checked + .ring::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      background: var(--red);
+    }
+    .opt input:focus-visible + .ring {
+      outline: 2px solid var(--navy);
+      outline-offset: 3px;
+    }
+    .opt span { font-size: 16px; color: var(--ink); }
+
+    textarea {
+      width: 100%;
+      height: 72px;
+      min-height: 72px;
+      max-height: 72px;
+      border: 1.5px solid #e1e5eb;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font: 15px/1.45 "Roboto", sans-serif;
+      resize: none;
+      background: #f7f8fa;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--red);
+      background: #fff;
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 16%, transparent);
+    }
+
+    .note {
+      margin-top: 12px;
+    }
+    .note label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 18px;
+      margin-top: 12px;
+      padding-top: 4px;
+      flex-shrink: 0;
+    }
+    .back {
+      border: 0;
+      background: none;
+      font: 500 16px "Roboto", sans-serif;
+      color: var(--navy);
+      cursor: pointer;
+      padding: 10px 4px;
+    }
+    .back:disabled { opacity: 0.35; cursor: default; }
+    .next {
+      border: 0;
+      background: var(--yellow);
+      color: var(--navy);
+      font-family: "Poppins", sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      padding: 12px 26px;
+      border-radius: 999px;
+      cursor: pointer;
+      min-width: 96px;
+    }
+    .next:disabled { opacity: 0.4; cursor: not-allowed; }
+    .next:focus-visible, .back:focus-visible, .close:focus-visible {
+      outline: 2px solid var(--navy);
+      outline-offset: 3px;
+    }
+
+    .brand {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 14px;
+      flex-shrink: 0;
+      height: 32px;
+    }
+    .brand img { height: 26px; opacity: 0.95; }
+
+    .done {
+      display: none;
+      text-align: center;
+      padding: 48px 12px 24px;
+    }
+    .done.show { display: block; }
+    .done img { height: 32px; margin-bottom: 24px; }
+    .done h2 {
+      font-family: "Poppins", sans-serif;
+      font-size: 28px;
+      margin: 0 0 10px;
+      color: var(--navy);
+    }
+    .done p { color: var(--muted); line-height: 1.55; }
+    .done a { color: var(--red); text-decoration: none; font-weight: 500; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ghost { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <div class="stack">
+    <div class="ghost"></div>
+    <div class="ghost b"></div>
+    <article class="card" id="card">
+      <div class="top">
+        <div class="dashes" id="dashes" aria-hidden="true"></div>
+        <button class="close" type="button" aria-label="Close" onclick="location.href='index.html'">×</button>
+      </div>
+      <div class="body" id="body"></div>
+      <div class="nav">
+        <button class="back" id="back" type="button">Back</button>
+        <button class="next" id="next" type="button">Next</button>
+      </div>
+    </article>
+    </div>
+    <div class="brand"><img src="assets/proagri-wordmark-red.png" alt="ProAgri" /></div>
+  </div>
+
+  <script src="questions.js"></script>
+  <script>
+    const STEPS = [
+      {
+        kicker: "Leads",
+        q: CHECKIN.questions[0],
+        note: CHECKIN.questions[1],
+      },
+      {
+        kicker: "Content",
+        q: CHECKIN.questions[2],
+        note: CHECKIN.questions[3],
+      },
+      {
+        kicker: "Return",
+        q: CHECKIN.questions[4],
+      },
+      {
+        kicker: "Value",
+        q: CHECKIN.questions[5],
+      },
+      {
+        kicker: "Account",
+        q: CHECKIN.questions[6],
+      },
+    ];
+
+    const answers = {};
+    let i = 0;
+    const dashes = document.getElementById("dashes");
+    STEPS.forEach(() => dashes.appendChild(document.createElement("i")));
+
+    function selected(q) {
+      if (q.type === "text") return Boolean(answers[q.id]);
+      return Boolean(answers[q.id]);
+    }
+
+    function render() {
+      const step = STEPS[i];
+      const q = step.q;
+      const pad = String(i + 1).padStart(2, "0");
+      [...dashes.children].forEach((el, n) => {
+        el.className = n < i ? "on" : n === i ? "now" : "";
+      });
+      document.getElementById("back").disabled = i === 0;
+      const next = document.getElementById("next");
+      next.textContent = i === STEPS.length - 1 ? "Submit" : "Next";
+
+      const opts = q.type === "choice"
+        ? q.options
+        : q.type === "rating"
+          ? (q.scale === "roi" ? CHECKIN.roi : CHECKIN.likert).map((label) => ({ value: label, label }))
+          : null;
+
+      let html = `<p class="kicker">QUESTION ${pad}</p><h1>${q.text}</h1>`;
+      if (opts) {
+        html += `<p class="hint">SELECT ONLY ONE</p><div class="opts">`;
+        opts.forEach((opt, n) => {
+          const checked = answers[q.id] === opt.value ? "checked" : "";
+          html += `<label class="opt"><input type="radio" name="${q.id}" value="${opt.value}" ${checked} /><span class="ring"></span><span>${opt.label}</span></label>`;
+        });
+        html += `</div>`;
+      } else {
+        html += `<textarea placeholder="${q.placeholder || ""}">${answers[q.id] || ""}</textarea>`;
+      }
+      if (step.note) {
+        html += `<div class="note"><label for="note">${step.note.text}</label><textarea id="note" placeholder="${step.note.placeholder}">${answers[step.note.id] || ""}</textarea></div>`;
+      }
+      document.getElementById("body").innerHTML = html;
+
+      document.querySelectorAll(".opt input").forEach((inp) => {
+        inp.addEventListener("change", () => {
+          answers[q.id] = inp.value;
+          gate();
+        });
+      });
+      document.querySelectorAll("textarea").forEach((ta) => {
+        ta.addEventListener("input", () => {
+          if (ta.id === "note") answers[step.note.id] = ta.value.trim();
+          else answers[q.id] = ta.value.trim();
+          gate();
+        });
+      });
+      gate();
+    }
+
+    function gate() {
+      const q = STEPS[i].q;
+      const ok = q.required === false ? true : Boolean(answers[q.id]);
+      document.getElementById("next").disabled = !ok;
+    }
+
+    document.getElementById("next").addEventListener("click", () => {
+      if (i < STEPS.length - 1) {
+        i += 1;
+        render();
+      } else {
+        document.getElementById("stage").innerHTML = `
+          <div class="stack">
+            <div class="ghost"></div>
+            <div class="ghost b"></div>
+            <article class="card">
+              <div class="done show">
+                <h2>That’s it.</h2>
+                <p>Thanks for the check-in. We’ll keep delivery tight — and we’ll be in touch if you asked us to.</p>
+                <p><a href="index.html">Back to variations</a></p>
+              </div>
+            </article>
+          </div>
+          <div class="brand"><img src="assets/proagri-wordmark-red.png" alt="ProAgri" /></div>`;
+      }
+    });
+    document.getElementById("back").addEventListener("click", () => {
+      if (i === 0) return;
+      i -= 1;
+      render();
+    });
+    render();
+  </script>
+</body>
+</html>

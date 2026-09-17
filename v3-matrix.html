@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Client Check-in Survey — Matrix</title>
+  <!--
+    THESIS: The check-in is a brand-guidelines page you fill in — navy field, red matrix, yellow rule.
+    OWN-WORLD: Red→navy gradient, giant matrix watermark, Poppins solid+outline wordmark, 1–5 score tiles.
+    STORY: Three chapters (Leads, Content, ROI) then a yes/no for a call.
+    FIRST VIEWPORT: Full-bleed gradient with white PROAGRI MEDIA, CHECK-IN / SURVEY, chapter 1 score tiles.
+    FORM: CI section-divider as the survey chrome, not a generic form card.
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red: #f03340;
+      --navy: #1c365c;
+      --ink: #212421;
+      --yellow: #ffbf40;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      min-height: 100vh;
+      font-family: "Roboto", system-ui, sans-serif;
+      color: #fff;
+      background: linear-gradient(125deg, var(--red) 0%, #8a274c 48%, var(--navy) 100%);
+      -webkit-font-smoothing: antialiased;
+    }
+    .matrix {
+      position: fixed;
+      left: -18%;
+      top: -22%;
+      width: min(92vw, 820px);
+      height: min(92vw, 820px);
+      background: url("assets/matrix.svg") center / contain no-repeat;
+      opacity: 0.18;
+      pointer-events: none;
+      filter: brightness(10);
+    }
+    @media (max-width: 860px) {
+      .matrix {
+        left: auto;
+        right: -18%;
+        top: -12%;
+        width: 70vw;
+        height: 70vw;
+      }
+    }
+    .shell {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(260px, 38%) 1fr;
+      min-height: 100vh;
+    }
+    .aside {
+      padding: 36px 36px 28px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgb(255 255 255 / 0.12);
+    }
+    .aside img.logo { height: 34px; width: auto; align-self: flex-start; }
+    .display {
+      margin-top: auto;
+      padding-bottom: 28px;
+    }
+    .display .year {
+      font-size: 13px;
+      letter-spacing: 0.22em;
+      font-weight: 500;
+      margin: 0 0 14px;
+      color: var(--yellow);
+    }
+    .display h1 {
+      font-family: "Poppins", sans-serif;
+      font-weight: 800;
+      font-size: clamp(40px, 6vw, 72px);
+      line-height: 0.88;
+      letter-spacing: -0.04em;
+      margin: 0;
+      text-transform: uppercase;
+    }
+    .display h1 .outline {
+      display: block;
+      color: transparent;
+      -webkit-text-stroke: 2px #fff;
+      font-weight: 800;
+    }
+    .rule {
+      height: 3px;
+      width: 88px;
+      background: var(--yellow);
+      margin: 22px 0 18px;
+    }
+    .display p {
+      max-width: 34ch;
+      line-height: 1.55;
+      color: rgb(255 255 255 / 0.82);
+      font-size: 15px;
+      margin: 0;
+    }
+    .chapters {
+      display: flex;
+      gap: 8px;
+      margin-top: 28px;
+    }
+    .chapters button {
+      flex: 1;
+      border: 1px solid rgb(255 255 255 / 0.28);
+      background: transparent;
+      color: #fff;
+      font: 500 11px/1 "Poppins", sans-serif;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 10px 6px;
+      cursor: pointer;
+    }
+    .chapters button.on {
+      background: #fff;
+      color: var(--navy);
+      border-color: #fff;
+    }
+    .chapters button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .panel {
+      background: #fff;
+      color: var(--ink);
+      margin: 24px;
+      border-radius: 4px 4px 0 0;
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - 48px);
+      box-shadow: 0 30px 80px -30px rgb(0 0 0 / 0.45);
+    }
+    .panel header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 22px 32px 0;
+      gap: 12px;
+    }
+    .panel header .sec {
+      font-family: "Poppins", sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--navy);
+    }
+    .panel header .sec span {
+      -webkit-text-stroke: 1px var(--navy);
+      color: transparent;
+      margin-left: 6px;
+    }
+    .panel header .count {
+      font-size: 12px;
+      color: #7a8492;
+      letter-spacing: 0.08em;
+    }
+    .panel .gold {
+      height: 3px;
+      background: var(--yellow);
+      margin: 16px 32px 0;
+    }
+    .panel .body {
+      padding: 28px 32px 24px;
+      flex: 1;
+    }
+    .panel h2 {
+      font-family: "Poppins", sans-serif;
+      font-size: clamp(22px, 2.4vw, 30px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.25;
+      color: var(--navy);
+      margin: 0 0 8px;
+    }
+    .sub {
+      color: #66707c;
+      font-size: 14px;
+      margin: 0 0 28px;
+    }
+
+    .scores {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .score {
+      appearance: none;
+      border: 1.5px solid #d7dde6;
+      background: #fff;
+      min-height: 92px;
+      cursor: pointer;
+      font-family: "Poppins", sans-serif;
+      color: var(--navy);
+      padding: 12px 6px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .score b {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .score small {
+      font-family: "Roboto", sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      color: #6b7380;
+      text-align: center;
+      line-height: 1.25;
+    }
+    .score:hover { border-color: var(--red); }
+    .score.on {
+      background: var(--red);
+      border-color: var(--red);
+      color: #fff;
+    }
+    .score.on small { color: rgb(255 255 255 / 0.88); }
+    .score:focus-visible { outline: 2px solid var(--navy); outline-offset: 3px; }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      border: 1.5px solid #d7dde6;
+      padding: 14px 16px;
+      font: 15px/1.5 "Roboto", sans-serif;
+      resize: vertical;
+      margin-top: 8px;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 16%, transparent);
+    }
+    .field-label {
+      display: block;
+      font-size: 13px;
+      color: #5c6570;
+      margin-top: 22px;
+    }
+
+    .choices { display: grid; gap: 10px; }
+    .choice {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border: 1.5px solid #d7dde6;
+      padding: 16px 18px;
+      cursor: pointer;
+      min-height: 64px;
+    }
+    .choice input { position: absolute; opacity: 0; pointer-events: none; }
+    .choice .box {
+      width: 18px; height: 18px; flex: 0 0 18px;
+      border: 1.6px solid #c5ccd6;
+      border-radius: 50%;
+      position: relative;
+    }
+    .choice input:checked ~ .box { border-color: var(--red); }
+    .choice input:checked ~ .box::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      border-radius: 50%;
+      background: var(--red);
+    }
+    .choice.on { border-color: var(--red); background: #fdecee; }
+    .choice span { font-size: 15px; }
+
+    .foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 32px 22px;
+      border-top: 1px solid #eef0f3;
+    }
+    .back {
+      border: 0;
+      background: none;
+      color: var(--navy);
+      font: 500 15px "Roboto", sans-serif;
+      cursor: pointer;
+      padding: 10px 0;
+    }
+    .go {
+      border: 0;
+      background: var(--navy);
+      color: #fff;
+      font-family: "Poppins", sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      padding: 14px 28px;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+    }
+    .go:disabled { background: #c5ccd6; cursor: not-allowed; }
+    .go:focus-visible, .back:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+
+    .thanks {
+      display: none;
+      padding: 64px 32px;
+      text-align: left;
+    }
+    .thanks.show { display: block; }
+    .thanks h2 {
+      font-family: "Poppins", sans-serif;
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--navy);
+      margin: 0 0 12px;
+      text-transform: uppercase;
+    }
+    .thanks h2 span {
+      -webkit-text-stroke: 2px var(--navy);
+      color: transparent;
+    }
+    .thanks p { color: #5c6570; max-width: 42ch; line-height: 1.55; }
+    .thanks a { color: var(--red); font-weight: 500; text-decoration: none; }
+
+    @media (max-width: 860px) {
+      .shell { grid-template-columns: 1fr; }
+      .aside {
+        border-right: 0;
+        padding: 22px 22px 8px;
+      }
+      .display { margin-top: 18px; padding-bottom: 8px; }
+      .display h1 { font-size: 42px; }
+      .panel {
+        margin: 12px 12px 0;
+        min-height: auto;
+        border-radius: 4px 4px 0 0;
+      }
+      .panel header, .panel .body, .foot { padding-left: 20px; padding-right: 20px; }
+      .panel .gold { margin-left: 20px; margin-right: 20px; }
+      .scores { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+      .score { min-height: 76px; padding: 8px 2px; }
+      .score b { font-size: 22px; }
+      .score small { font-size: 9px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="matrix" aria-hidden="true"></div>
+  <div class="shell" id="app">
+    <aside class="aside">
+      <img class="logo" src="assets/proagri-wordmark-white.png" alt="ProAgri" />
+      <div class="display">
+        <p class="year">2026  —  CLIENT CARE</p>
+        <h1>Check-in <span class="outline">Survey</span></h1>
+        <div class="rule"></div>
+        <p>Seven questions. Under a minute. Leads, content, ROI — then tell us if you want a call.</p>
+        <div class="chapters" id="tabs"></div>
+      </div>
+    </aside>
+    <section class="panel" id="panel"></section>
+  </div>
+
+  <script src="questions.js"></script>
+  <script>
+    const CHAPTERS = [
+      {
+        key: "LEADS",
+        outline: "01",
+        q: CHECKIN.questions[0],
+        note: CHECKIN.questions[1],
+        sub: "Volume and quality of leads generated recently.",
+      },
+      {
+        key: "CONTENT",
+        outline: "02",
+        q: CHECKIN.questions[2],
+        note: CHECKIN.questions[3],
+        sub: "Quality, turnaround and delivery of recent video and media.",
+      },
+      {
+        key: "ROI",
+        outline: "03",
+        q: CHECKIN.questions[4],
+        note: CHECKIN.questions[5],
+        sub: "Whether the platform is paying its way — and one thing that did.",
+      },
+      {
+        key: "ACCOUNT",
+        outline: "04",
+        q: CHECKIN.questions[6],
+        sub: "A yes here puts your account manager in touch.",
+      },
+    ];
+
+    const answers = {};
+    let i = 0;
+    const tabs = document.getElementById("tabs");
+    CHAPTERS.forEach((ch, n) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = ch.key;
+      b.disabled = n !== 0;
+      b.addEventListener("click", () => {
+        if (n <= furthest()) {
+          i = n;
+          render();
+        }
+      });
+      tabs.appendChild(b);
+    });
+
+    function furthest() {
+      let f = 0;
+      CHAPTERS.forEach((ch, n) => {
+        if (ready(n)) f = Math.min(n + 1, CHAPTERS.length - 1);
+      });
+      return f;
+    }
+    function ready(n) {
+      const ch = CHAPTERS[n];
+      if (ch.q.type === "text") return Boolean(answers[ch.q.id]);
+      if (!answers[ch.q.id]) return false;
+      if (ch.note && ch.note.required && !answers[ch.note.id]) return false;
+      return true;
+    }
+
+    function render() {
+      const ch = CHAPTERS[i];
+      [...tabs.children].forEach((b, n) => {
+        b.classList.toggle("on", n === i);
+        b.disabled = n > furthest() && n !== i;
+      });
+
+      const q = ch.q;
+      let inner = "";
+      if (q.type === "rating") {
+        const labels = q.scale === "roi" ? CHECKIN.roi : CHECKIN.likert;
+        inner += `<div class="scores" role="radiogroup" aria-label="${q.text}">`;
+        labels.forEach((label, n) => {
+          const on = answers[q.id] === label ? "on" : "";
+          inner += `<button type="button" class="score ${on}" data-value="${label}"><b>${n + 1}</b><small>${label}</small></button>`;
+        });
+        inner += `</div>`;
+        if (ch.note) {
+          inner += `<label class="field-label">${ch.note.text}${ch.note.required ? "" : " (optional)"}</label>
+            <textarea placeholder="${ch.note.placeholder}">${answers[ch.note.id] || ""}</textarea>`;
+        }
+      } else if (q.type === "choice") {
+        inner += `<div class="choices">`;
+        q.options.forEach((opt) => {
+          const on = answers[q.id] === opt.value ? "on" : "";
+          inner += `<label class="choice ${on}"><input type="radio" name="${q.id}" value="${opt.value}" ${on ? "checked" : ""} /><span class="box"></span><span>${opt.label}</span></label>`;
+        });
+        inner += `</div>`;
+      } else {
+        inner += `<textarea placeholder="${q.placeholder}">${answers[q.id] || ""}</textarea>`;
+      }
+
+      document.getElementById("panel").innerHTML = `
+        <header>
+          <div class="sec">${ch.key} <span>${ch.outline}</span></div>
+          <div class="count">${String(i + 1).padStart(2, "0")} / 0${CHAPTERS.length}</div>
+        </header>
+        <div class="gold"></div>
+        <div class="body">
+          <h2>${q.text}</h2>
+          <p class="sub">${ch.sub}</p>
+          ${inner}
+        </div>
+        <div class="foot">
+          <button class="back" type="button" ${i === 0 ? "disabled style='opacity:.35'" : ""}>Back</button>
+          <button class="go" type="button" id="go">${i === CHAPTERS.length - 1 ? "Submit check-in" : "Next chapter"}</button>
+        </div>`;
+
+      document.querySelectorAll(".score").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          answers[q.id] = btn.dataset.value;
+          render();
+        });
+      });
+      document.querySelectorAll(".choice input").forEach((inp) => {
+        inp.addEventListener("change", () => {
+          answers[q.id] = inp.value;
+          render();
+        });
+      });
+      document.querySelectorAll("textarea").forEach((ta) => {
+        ta.addEventListener("input", () => {
+          if (ch.note) answers[ch.note.id] = ta.value.trim();
+          else answers[q.id] = ta.value.trim();
+          document.getElementById("go").disabled = !ready(i);
+        });
+      });
+      document.querySelector(".back").addEventListener("click", () => {
+        if (i > 0) { i -= 1; render(); }
+      });
+      const go = document.getElementById("go");
+      go.disabled = !ready(i);
+      go.addEventListener("click", () => {
+        if (!ready(i)) return;
+        if (i < CHAPTERS.length - 1) {
+          i += 1;
+          render();
+        } else {
+          document.getElementById("panel").innerHTML = `
+            <div class="gold" style="margin-top:0"></div>
+            <div class="thanks show">
+              <h2>Thank <span>you</span></h2>
+              <p>Check-in received. We’ll keep delivery tight — and we’ll be in touch if you asked us to.</p>
+              <p><a href="index.html">Back to variations</a></p>
+            </div>`;
+        }
+      });
+    }
+    render();
+  </script>
+</body>
+</html>

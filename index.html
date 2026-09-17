@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ProAgri — Check-in survey variations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red: #f03340;
+      --navy: #1c365c;
+      --ink: #212421;
+      --yellow: #ffbf40;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: "Roboto", system-ui, sans-serif;
+      background: #eef0f3;
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    header {
+      background: var(--navy);
+      color: #fff;
+      padding: 28px 32px 24px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    header img { height: 32px; }
+    header h1 {
+      font-family: "Poppins", sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+    header p {
+      margin: 6px 0 0;
+      color: rgb(255 255 255 / 0.72);
+      font-size: 14px;
+      max-width: 52ch;
+    }
+    .gold { height: 4px; background: var(--yellow); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 28px;
+      padding: 36px 28px 64px;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+    .col h2 {
+      font-family: "Poppins", sans-serif;
+      font-size: 15px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--navy);
+      margin: 0 0 6px;
+    }
+    .col .tag {
+      display: inline-block;
+      background: var(--red);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 3px 7px;
+      margin-bottom: 10px;
+    }
+    .col p {
+      font-size: 14px;
+      color: #5c6570;
+      line-height: 1.5;
+      margin: 0 0 16px;
+      min-height: 4.5em;
+    }
+    .phone {
+      background: #111;
+      border-radius: 36px;
+      padding: 12px 10px 16px;
+      box-shadow: 0 28px 60px -24px rgb(28 54 92 / 0.45);
+    }
+    .phone iframe {
+      display: block;
+      width: 100%;
+      height: 680px;
+      border: 0;
+      border-radius: 26px;
+      background: #fff;
+    }
+    .open {
+      display: inline-flex;
+      margin-top: 14px;
+      background: var(--navy);
+      color: #fff;
+      text-decoration: none;
+      font-family: "Poppins", sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 16px;
+    }
+    .open:hover { background: var(--red); }
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: 1fr; max-width: 460px; }
+      .phone iframe { height: 720px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="assets/proagri-wordmark-white.png" alt="ProAgri" />
+    <div>
+      <h1>Client check-in — three local variations</h1>
+      <p>Same seven Tally questions. ProAgri wordmark. Shared CI: red #f03340, navy #1c365c, yellow #ffbf40, Poppins + Roboto. No green.</p>
+    </div>
+  </header>
+  <div class="gold"></div>
+  <main class="grid">
+    <article class="col">
+      <span class="tag">A · from concept 1</span>
+      <h2>Scroll</h2>
+      <p>All seven questions on one page. Numbered radios, red selected fill, thin progress rail, Survey chip in the title — the sushi reference, restated in CI.</p>
+      <div class="phone"><iframe src="v1-scroll.html" title="Scroll variation"></iframe></div>
+      <a class="open" href="v1-scroll.html">Open fullscreen</a>
+    </article>
+    <article class="col">
+      <span class="tag">B · from concept 2</span>
+      <h2>Cards</h2>
+      <p>One question at a time on stacked paper. Five dashes, yellow Next (the lime, on-brand), navy-mist field. Optional notes ride with the rating.</p>
+      <div class="phone"><iframe src="v2-cards.html" title="Cards variation"></iframe></div>
+      <a class="open" href="v2-cards.html">Open fullscreen</a>
+    </article>
+    <article class="col">
+      <span class="tag">C · CI editorial</span>
+      <h2>Matrix</h2>
+      <p>Brand-guidelines chrome: red-to-navy gradient, giant matrix watermark, solid + outline heading, yellow rule, 1–5 score tiles in four chapters.</p>
+      <div class="phone"><iframe src="v3-matrix.html" title="Matrix variation"></iframe></div>
+      <a class="open" href="v3-matrix.html">Open fullscreen</a>
+    </article>
+  </main>
+</body>
+</html>

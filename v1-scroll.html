@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Client Check-in Survey — Scroll</title>
+  <!--
+    THESIS: One quiet page you can finish in a minute — numbered questions, one red mark, no chrome.
+    OWN-WORLD: Paper-grey canvas, Poppins title, Roboto body, red radio fill (#f03340), navy ink (#1c365c).
+    STORY: A farmer-owner rates leads, content and ROI, then says whether they want a call.
+    FIRST VIEWPORT: Logo, two-line title with Survey in a red chip, thin progress rail, Q1 radios.
+    FORM: All-on-one scroll, the sushi reference restated in ProAgriMedia CI.
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red: #f03340;
+      --navy: #1c365c;
+      --ink: #212421;
+      --yellow: #ffbf40;
+      --canvas: #f2f3f5;
+      --muted: #6b7280;
+      --line: #d5d8de;
+      --white: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: "Roboto", system-ui, sans-serif;
+      background: var(--canvas);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
+    .page {
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 28px 28px 48px;
+    }
+    .logo {
+      display: block;
+      height: 32px;
+      width: auto;
+      margin: 8px auto 28px;
+    }
+    h1 {
+      font-family: "Poppins", sans-serif;
+      font-weight: 600;
+      font-size: 26px;
+      line-height: 1.2;
+      text-align: center;
+      letter-spacing: -0.02em;
+      margin: 0;
+      color: var(--ink);
+    }
+    h1 .line2 {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      font-weight: 700;
+    }
+    .chip {
+      display: inline-block;
+      background: var(--red);
+      color: #fff;
+      font-size: 22px;
+      font-weight: 700;
+      padding: 2px 8px 3px;
+      line-height: 1.15;
+      border-radius: 3px;
+    }
+    .lede {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.5;
+      margin: 14px 0 0;
+    }
+    .rail {
+      position: relative;
+      height: 18px;
+      margin: 36px 8px 40px;
+    }
+    .rail-track {
+      position: absolute;
+      left: 8px; right: 8px; top: 8px;
+      height: 2px;
+      background: var(--line);
+      border-radius: 2px;
+    }
+    .rail-fill {
+      position: absolute;
+      left: 8px; top: 8px;
+      height: 2px;
+      width: 0%;
+      background: var(--red);
+      border-radius: 2px;
+      transition: width 280ms ease;
+    }
+    .rail-dot {
+      position: absolute;
+      top: 4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--canvas);
+      border: 2px solid var(--line);
+      transform: translateX(-50%);
+    }
+    .rail-dot.start { left: 8px; border-color: var(--red); }
+    .rail-dot.mid { left: 50%; }
+    .rail-dot.end { left: calc(100% - 8px); }
+    .rail-dot.done { border-color: var(--red); background: var(--red); }
+
+    .q { margin: 0 0 32px; }
+    .q h2 {
+      font-family: "Poppins", sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.4;
+      margin: 0 0 14px;
+      color: var(--ink);
+    }
+    .opt {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-height: 44px;
+      padding: 4px 0;
+      cursor: pointer;
+      user-select: none;
+    }
+    .opt input { position: absolute; opacity: 0; pointer-events: none; }
+    .dot {
+      width: 22px;
+      height: 22px;
+      flex: 0 0 22px;
+      border-radius: 50%;
+      border: 1.5px solid #c5c9d1;
+      background: #fff;
+      position: relative;
+    }
+    .opt:hover .dot { border-color: var(--red); }
+    .opt input:focus-visible + .dot {
+      outline: 2px solid var(--navy);
+      outline-offset: 3px;
+    }
+    .opt input:checked + .dot {
+      border-color: var(--red);
+    }
+    .opt input:checked + .dot::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      background: var(--red);
+    }
+    .opt span {
+      font-size: 15px;
+      color: #3a3d40;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 84px;
+      resize: vertical;
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font: 15px/1.45 "Roboto", sans-serif;
+      color: var(--ink);
+      background: #fff;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 18%, transparent);
+    }
+    textarea::placeholder { color: #9aa1ab; }
+
+    .actions {
+      padding: 8px 0 8px;
+    }
+    .submit {
+      width: 100%;
+      height: 52px;
+      border: 0;
+      border-radius: 12px;
+      background: var(--red);
+      color: #fff;
+      font-family: "Poppins", sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .submit:disabled {
+      background: #d9dde3;
+      color: #8b929c;
+      cursor: not-allowed;
+    }
+    .submit:focus-visible { outline: 2px solid var(--navy); outline-offset: 3px; }
+    .hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 10px 0 0;
+    }
+
+    .thanks {
+      display: none;
+      text-align: center;
+      padding: 72px 8px 40px;
+    }
+    .thanks.show { display: block; }
+    .thanks img { height: 36px; margin-bottom: 28px; }
+    .thanks h2 {
+      font-family: "Poppins", sans-serif;
+      font-size: 28px;
+      margin: 0 0 10px;
+      letter-spacing: -0.03em;
+    }
+    .thanks p { color: var(--muted); line-height: 1.55; margin: 0 0 28px; }
+    .thanks a {
+      color: var(--red);
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    @media (min-width: 720px) {
+      body { background: #e8eaee; }
+      .page {
+        margin: 32px auto 48px;
+        background: var(--canvas);
+        border-radius: 28px;
+        box-shadow: 0 24px 60px -24px rgb(28 54 92 / 0.28);
+        min-height: 80vh;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .rail-fill { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page" id="formPage">
+    <img class="logo" src="assets/proagri-wordmark-red.png" alt="ProAgri" />
+    <h1>
+      Client Check-in
+      <span class="line2"><span class="chip">Survey</span></span>
+    </h1>
+    <p class="lede">The survey consists of 7 questions. Thank you for completing it — under 60 seconds.</p>
+
+    <div class="rail" aria-hidden="true">
+      <div class="rail-track"></div>
+      <div class="rail-fill" id="fill"></div>
+      <span class="rail-dot start" id="d0"></span>
+      <span class="rail-dot mid" id="d1"></span>
+      <span class="rail-dot end" id="d2"></span>
+    </div>
+
+    <form id="survey" novalidate></form>
+    <div class="actions">
+      <button class="submit" id="submit" type="submit" form="survey" disabled>Submit</button>
+      <p class="hint">Required questions unlock Submit. Notes are optional.</p>
+    </div>
+  </main>
+
+  <section class="thanks" id="thanks">
+    <img src="assets/proagri-wordmark-red.png" alt="ProAgri" />
+    <h2>Thank you.</h2>
+    <p>Your check-in is in. We’ll keep delivery tight — and we’ll be in touch if you asked us to.</p>
+    <a href="index.html">Back to variations</a>
+  </section>
+
+  <script src="questions.js"></script>
+  <script>
+    const form = document.getElementById("survey");
+    const answers = {};
+    const required = CHECKIN.questions.filter((q) => q.required).map((q) => q.id);
+
+    function scale(q) {
+      return q.scale === "roi" ? CHECKIN.roi : CHECKIN.likert;
+    }
+
+    CHECKIN.questions.forEach((q) => {
+      const wrap = document.createElement("section");
+      wrap.className = "q";
+      wrap.innerHTML = `<h2>${q.n}. ${q.text}</h2>`;
+      if (q.type === "rating" || q.type === "choice") {
+        const opts = q.type === "choice" ? q.options : scale(q).map((label) => ({ value: label, label }));
+        opts.forEach((opt, i) => {
+          const id = `${q.id}_${i}`;
+          const lab = document.createElement("label");
+          lab.className = "opt";
+          lab.htmlFor = id;
+          lab.innerHTML = `<input type="radio" name="${q.id}" id="${id}" value="${opt.value}" /><span class="dot"></span><span>${opt.label}</span>`;
+          lab.querySelector("input").addEventListener("change", () => {
+            answers[q.id] = opt.value;
+            tick();
+          });
+          wrap.appendChild(lab);
+        });
+      } else {
+        const ta = document.createElement("textarea");
+        ta.name = q.id;
+        ta.placeholder = q.placeholder;
+        ta.addEventListener("input", () => {
+          answers[q.id] = ta.value.trim();
+          tick();
+        });
+        wrap.appendChild(ta);
+      }
+      form.appendChild(wrap);
+    });
+
+    function tick() {
+      const done = required.filter((id) => answers[id]).length;
+      const pct = (done / required.length) * 100;
+      document.getElementById("fill").style.width = `calc(${pct}% - 16px)`;
+      document.getElementById("d0").classList.toggle("done", pct > 0);
+      document.getElementById("d1").classList.toggle("done", pct >= 50);
+      document.getElementById("d2").classList.toggle("done", pct >= 100);
+      document.getElementById("submit").disabled = done < required.length;
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (required.some((id) => !answers[id])) return;
+      document.getElementById("formPage").style.display = "none";
+      document.getElementById("thanks").classList.add("show");
+      window.scrollTo(0, 0);
+    });
+  </script>
+</body>
+</html>

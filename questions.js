@@ -1,0 +1,82 @@
+/* ProAgriMedia Client Check-in — source: https://tally.so/r/b5JMq2 */
+window.CHECKIN = {
+  brand: "ProAgri",
+  title: "Client Check-in Survey",
+  intro:
+    "Quick check-in (under 60 seconds). Your feedback on leads, content, and ROI helps us keep delivery tight. One or two sentences is enough.",
+  likert: [
+    "Very dissatisfied",
+    "Dissatisfied",
+    "Neutral",
+    "Satisfied",
+    "Very satisfied",
+  ],
+  roi: [
+    "Not at all",
+    "Slightly",
+    "Moderately",
+    "Well",
+    "Exceptionally well",
+  ],
+  questions: [
+    {
+      id: "leads",
+      type: "rating",
+      n: 1,
+      required: true,
+      text: "How satisfied are you with the volume and quality of leads generated for your business recently?",
+      scale: "likert",
+    },
+    {
+      id: "leads_note",
+      type: "text",
+      n: 2,
+      required: false,
+      text: "Any quick note on lead quality?",
+      placeholder: "One or two sentences is enough.",
+    },
+    {
+      id: "content",
+      type: "rating",
+      n: 3,
+      required: true,
+      text: "How satisfied are you with the quality, turnaround, and delivery of your recent video/media content?",
+      scale: "likert",
+    },
+    {
+      id: "content_note",
+      type: "text",
+      n: 4,
+      required: false,
+      text: "Any feedback on upcoming shoots or video topics?",
+      placeholder: "Topics, dates, or anything we should know.",
+    },
+    {
+      id: "roi",
+      type: "rating",
+      n: 5,
+      required: true,
+      text: "Overall, how well is our platform delivering return on investment (ROI) for your business?",
+      scale: "roi",
+    },
+    {
+      id: "value",
+      type: "text",
+      n: 6,
+      required: true,
+      text: "What is ONE thing we’ve filmed, posted, or executed recently that genuinely added value or made your work easier?",
+      placeholder: "One specific thing is enough.",
+    },
+    {
+      id: "contact",
+      type: "choice",
+      n: 7,
+      required: true,
+      text: "Do you need our account team or management to get in touch with you regarding support, upcoming shoots, or your account?",
+      options: [
+        { value: "no", label: "No, everything is running smoothly!" },
+        { value: "yes", label: "Yes, please have my account manager / management contact me." },
+      ],
+    },
+  ],
+};
