@@ -10,6 +10,13 @@ window.CHECKIN = {
   thanksContact: "If you asked for contact, your account manager will follow up.",
   thanksLow:
     "Thanks — we’ll have your account manager review this within 24 hours.",
+  likert: [
+    "Very dissatisfied",
+    "Dissatisfied",
+    "Neutral",
+    "Satisfied",
+    "Very satisfied",
+  ],
   questions: [
     {
       id: "leads",
