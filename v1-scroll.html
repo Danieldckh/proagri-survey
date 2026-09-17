@@ -80,6 +80,46 @@
       line-height: 1.5;
       margin: 14px 0 0;
     }
+    .lede strong {
+      display: block;
+      color: var(--ink);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .stars {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .star {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: 48px;
+      min-height: 56px;
+      padding: 8px 6px 6px;
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      cursor: pointer;
+      color: #9aa1ab;
+      font-size: 11px;
+      user-select: none;
+    }
+    .star input { position: absolute; opacity: 0; pointer-events: none; }
+    .star b { font-size: 22px; line-height: 1; font-weight: 400; color: #c5c9d1; }
+    .star:hover, .star.on {
+      border-color: var(--red);
+      background: #fdecee;
+      color: var(--red);
+    }
+    .star:hover b, .star.on b { color: var(--red); }
+    .star input:focus-visible + b {
+      outline: 2px solid var(--navy);
+      outline-offset: 3px;
+    }
+    .q[hidden] { display: none; }
     .rail {
       position: relative;
       height: 18px;
@@ -252,7 +292,7 @@
       Client Check-in
       <span class="line2"><span class="chip">Survey</span></span>
     </h1>
-    <p class="lede">The survey consists of 7 questions. Thank you for completing it — under 60 seconds.</p>
+    <p class="lede"><strong>Quick check-in (under 60 seconds)</strong>Your feedback on leads, content, and ROI helps us keep delivery tight. One or two sentences is enough.</p>
 
     <div class="rail" aria-hidden="true">
       <div class="rail-track"></div>
@@ -265,14 +305,14 @@
     <form id="survey" novalidate></form>
     <div class="actions">
       <button class="submit" id="submit" type="submit" form="survey" disabled>Submit</button>
-      <p class="hint">Required questions unlock Submit. Notes are optional.</p>
+      <p class="hint">All questions as on the live Tally check-in.</p>
     </div>
   </main>
 
   <section class="thanks" id="thanks">
     <img src="assets/proagri-wordmark-red.png" alt="ProAgri" />
     <h2>Thank you.</h2>
-    <p>Your check-in is in. We’ll keep delivery tight — and we’ll be in touch if you asked us to.</p>
+    <p id="thanksCopy"></p>
     <a href="index.html">Back to variations</a>
   </section>
 
@@ -280,19 +320,36 @@
   <script>
     const form = document.getElementById("survey");
     const answers = {};
-    const required = CHECKIN.questions.filter((q) => q.required).map((q) => q.id);
+    const wraps = {};
 
-    function scale(q) {
-      return q.scale === "roi" ? CHECKIN.roi : CHECKIN.likert;
+    function needed() {
+      return CHECKIN.visibleQuestions(answers).filter((q) => q.required);
     }
 
     CHECKIN.questions.forEach((q) => {
       const wrap = document.createElement("section");
       wrap.className = "q";
-      wrap.innerHTML = `<h2>${q.n}. ${q.text}</h2>`;
-      if (q.type === "rating" || q.type === "choice") {
-        const opts = q.type === "choice" ? q.options : scale(q).map((label) => ({ value: label, label }));
-        opts.forEach((opt, i) => {
+      wrap.hidden = Boolean(q.hidden);
+      wrap.innerHTML = `<h2>${q.n ? q.n + ". " : ""}${q.text}</h2>`;
+      if (q.type === "stars") {
+        const row = document.createElement("div");
+        row.className = "stars";
+        row.setAttribute("role", "radiogroup");
+        row.setAttribute("aria-label", q.text);
+        for (let n = 1; n <= 5; n++) {
+          const lab = document.createElement("label");
+          lab.className = "star";
+          lab.innerHTML = `<input type="radio" name="${q.id}" value="${n}" /><b>★</b>${n}`;
+          lab.querySelector("input").addEventListener("change", () => {
+            answers[q.id] = String(n);
+            row.querySelectorAll(".star").forEach((el, i) => el.classList.toggle("on", i < n));
+            tick();
+          });
+          row.appendChild(lab);
+        }
+        wrap.appendChild(row);
+      } else if (q.type === "choice") {
+        q.options.forEach((opt, i) => {
           const id = `${q.id}_${i}`;
           const lab = document.createElement("label");
           lab.className = "opt";
@@ -300,6 +357,7 @@
           lab.innerHTML = `<input type="radio" name="${q.id}" id="${id}" value="${opt.value}" /><span class="dot"></span><span>${opt.label}</span>`;
           lab.querySelector("input").addEventListener("change", () => {
             answers[q.id] = opt.value;
+            if (opt.value !== "yes") delete answers.discuss;
             tick();
           });
           wrap.appendChild(lab);
@@ -314,22 +372,31 @@
         });
         wrap.appendChild(ta);
       }
+      wraps[q.id] = wrap;
       form.appendChild(wrap);
     });
 
     function tick() {
-      const done = required.filter((id) => answers[id]).length;
-      const pct = (done / required.length) * 100;
+      CHECKIN.questions.forEach((q) => {
+        if (!q.showWhen) return;
+        const show = answers[q.showWhen.id] === q.showWhen.value;
+        wraps[q.id].hidden = !show;
+        if (!show) delete answers[q.id];
+      });
+      const req = needed();
+      const done = req.filter((q) => answers[q.id]).length;
+      const pct = req.length ? (done / req.length) * 100 : 0;
       document.getElementById("fill").style.width = `calc(${pct}% - 16px)`;
       document.getElementById("d0").classList.toggle("done", pct > 0);
       document.getElementById("d1").classList.toggle("done", pct >= 50);
       document.getElementById("d2").classList.toggle("done", pct >= 100);
-      document.getElementById("submit").disabled = done < required.length;
+      document.getElementById("submit").disabled = done < req.length;
     }
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-      if (required.some((id) => !answers[id])) return;
+      if (needed().some((q) => !answers[q.id])) return;
+      document.getElementById("thanksCopy").textContent = CHECKIN.thanksCopy(answers);
       document.getElementById("formPage").style.display = "none";
       document.getElementById("thanks").classList.add("show");
       window.scrollTo(0, 0);

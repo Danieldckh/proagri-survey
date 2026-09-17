@@ -208,8 +208,9 @@
     }
     .score b {
       font-size: 28px;
-      font-weight: 800;
+      font-weight: 400;
       line-height: 1;
+      color: var(--red);
     }
     .score small {
       font-family: "Roboto", sans-serif;
@@ -225,6 +226,7 @@
       border-color: var(--red);
       color: #fff;
     }
+    .score.on b { color: #fff; }
     .score.on small { color: rgb(255 255 255 / 0.88); }
     .score:focus-visible { outline: 2px solid var(--navy); outline-offset: 3px; }
 
@@ -360,7 +362,7 @@
         <p class="year">2026  —  CLIENT CARE</p>
         <h1>Check-in <span class="outline">Survey</span></h1>
         <div class="rule"></div>
-        <p>Seven questions. Under a minute. Leads, content, ROI — then tell us if you want a call.</p>
+        <p>Quick check-in (under 60 seconds). Your feedback on leads, content, and ROI helps us keep delivery tight. One or two sentences is enough.</p>
         <div class="chapters" id="tabs"></div>
       </div>
     </aside>
@@ -389,12 +391,13 @@
         outline: "03",
         q: CHECKIN.questions[4],
         note: CHECKIN.questions[5],
-        sub: "Whether the platform is paying its way — and one thing that did.",
+        sub: "How well the platform is delivering ROI — and one recent win.",
       },
       {
         key: "ACCOUNT",
         outline: "04",
         q: CHECKIN.questions[6],
+        extra: CHECKIN.questions[7],
         sub: "A yes here puts your account manager in touch.",
       },
     ];
@@ -428,6 +431,7 @@
       if (ch.q.type === "text") return Boolean(answers[ch.q.id]);
       if (!answers[ch.q.id]) return false;
       if (ch.note && ch.note.required && !answers[ch.note.id]) return false;
+      if (ch.extra && answers[ch.q.id] === ch.extra.showWhen.value && !answers[ch.extra.id]) return false;
       return true;
     }
 
@@ -440,17 +444,16 @@
 
       const q = ch.q;
       let inner = "";
-      if (q.type === "rating") {
-        const labels = q.scale === "roi" ? CHECKIN.roi : CHECKIN.likert;
+      if (q.type === "stars") {
         inner += `<div class="scores" role="radiogroup" aria-label="${q.text}">`;
-        labels.forEach((label, n) => {
-          const on = answers[q.id] === label ? "on" : "";
-          inner += `<button type="button" class="score ${on}" data-value="${label}"><b>${n + 1}</b><small>${label}</small></button>`;
-        });
+        for (let n = 1; n <= 5; n++) {
+          const on = answers[q.id] === String(n) ? "on" : "";
+          inner += `<button type="button" class="score ${on}" data-value="${n}"><b>★</b><small>${n} star${n === 1 ? "" : "s"}</small></button>`;
+        }
         inner += `</div>`;
         if (ch.note) {
-          inner += `<label class="field-label">${ch.note.text}${ch.note.required ? "" : " (optional)"}</label>
-            <textarea placeholder="${ch.note.placeholder}">${answers[ch.note.id] || ""}</textarea>`;
+          inner += `<label class="field-label">${ch.note.text}</label>
+            <textarea data-for="${ch.note.id}" placeholder="${ch.note.placeholder}">${answers[ch.note.id] || ""}</textarea>`;
         }
       } else if (q.type === "choice") {
         inner += `<div class="choices">`;
@@ -459,6 +462,10 @@
           inner += `<label class="choice ${on}"><input type="radio" name="${q.id}" value="${opt.value}" ${on ? "checked" : ""} /><span class="box"></span><span>${opt.label}</span></label>`;
         });
         inner += `</div>`;
+        if (ch.extra && answers[q.id] === ch.extra.showWhen.value) {
+          inner += `<label class="field-label">${ch.extra.text}</label>
+            <textarea data-for="${ch.extra.id}" placeholder="${ch.extra.placeholder}">${answers[ch.extra.id] || ""}</textarea>`;
+        }
       } else {
         inner += `<textarea placeholder="${q.placeholder}">${answers[q.id] || ""}</textarea>`;
       }
@@ -488,13 +495,14 @@
       document.querySelectorAll(".choice input").forEach((inp) => {
         inp.addEventListener("change", () => {
           answers[q.id] = inp.value;
+          if (inp.value !== "yes") delete answers.discuss;
           render();
         });
       });
       document.querySelectorAll("textarea").forEach((ta) => {
         ta.addEventListener("input", () => {
-          if (ch.note) answers[ch.note.id] = ta.value.trim();
-          else answers[q.id] = ta.value.trim();
+          const key = ta.dataset.for || (ch.note ? ch.note.id : q.id);
+          answers[key] = ta.value.trim();
           document.getElementById("go").disabled = !ready(i);
         });
       });
@@ -513,7 +521,7 @@
             <div class="gold" style="margin-top:0"></div>
             <div class="thanks show">
               <h2>Thank <span>you</span></h2>
-              <p>Check-in received. We’ll keep delivery tight — and we’ll be in touch if you asked us to.</p>
+              <p>${CHECKIN.thanksCopy(answers)}</p>
               <p><a href="index.html">Back to variations</a></p>
             </div>`;
         }

@@ -155,6 +155,35 @@
       margin: 10px 0 8px;
       font-weight: 500;
     }
+    .stars {
+      display: flex;
+      gap: 6px;
+      margin: 8px 0 4px;
+    }
+    .star {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      min-height: 48px;
+      padding: 8px 4px 6px;
+      border: 1.5px solid #e1e5eb;
+      border-radius: 12px;
+      background: #fff;
+      cursor: pointer;
+      color: #9aa3ae;
+      font-size: 11px;
+      user-select: none;
+    }
+    .star input { position: absolute; opacity: 0; pointer-events: none; }
+    .star b { font-size: 20px; line-height: 1; font-weight: 400; color: #c5c9d1; }
+    .star.on, .star:hover {
+      border-color: var(--red);
+      background: #fdecee;
+      color: var(--red);
+    }
+    .star.on b, .star:hover b { color: var(--red); }
     .opts { display: grid; gap: 0; }
     .opt {
       display: flex;
@@ -333,6 +362,7 @@
       {
         kicker: "Account",
         q: CHECKIN.questions[6],
+        extra: CHECKIN.questions[7],
       },
     ];
 
@@ -357,16 +387,17 @@
       const next = document.getElementById("next");
       next.textContent = i === STEPS.length - 1 ? "Submit" : "Next";
 
-      const opts = q.type === "choice"
-        ? q.options
-        : q.type === "rating"
-          ? (q.scale === "roi" ? CHECKIN.roi : CHECKIN.likert).map((label) => ({ value: label, label }))
-          : null;
-
       let html = `<p class="kicker">QUESTION ${pad}</p><h1>${q.text}</h1>`;
-      if (opts) {
+      if (q.type === "stars") {
+        html += `<div class="stars" role="radiogroup">`;
+        for (let n = 1; n <= 5; n++) {
+          const on = Number(answers[q.id]) >= n ? "on" : "";
+          html += `<label class="star ${on}"><input type="radio" name="${q.id}" value="${n}" ${answers[q.id] === String(n) ? "checked" : ""} /><b>★</b>${n}</label>`;
+        }
+        html += `</div>`;
+      } else if (q.type === "choice") {
         html += `<p class="hint">SELECT ONLY ONE</p><div class="opts">`;
-        opts.forEach((opt, n) => {
+        q.options.forEach((opt) => {
           const checked = answers[q.id] === opt.value ? "checked" : "";
           html += `<label class="opt"><input type="radio" name="${q.id}" value="${opt.value}" ${checked} /><span class="ring"></span><span>${opt.label}</span></label>`;
         });
@@ -377,17 +408,22 @@
       if (step.note) {
         html += `<div class="note"><label for="note">${step.note.text}</label><textarea id="note" placeholder="${step.note.placeholder}">${answers[step.note.id] || ""}</textarea></div>`;
       }
+      if (step.extra && answers[q.id] === (step.extra.showWhen && step.extra.showWhen.value)) {
+        html += `<div class="note"><label for="extra">${step.extra.text}</label><textarea id="extra" placeholder="${step.extra.placeholder}">${answers[step.extra.id] || ""}</textarea></div>`;
+      }
       document.getElementById("body").innerHTML = html;
 
-      document.querySelectorAll(".opt input").forEach((inp) => {
+      document.querySelectorAll(".star input, .opt input").forEach((inp) => {
         inp.addEventListener("change", () => {
           answers[q.id] = inp.value;
-          gate();
+          if (q.id === "contact" && inp.value !== "yes") delete answers.discuss;
+          render();
         });
       });
       document.querySelectorAll("textarea").forEach((ta) => {
         ta.addEventListener("input", () => {
           if (ta.id === "note") answers[step.note.id] = ta.value.trim();
+          else if (ta.id === "extra") answers[step.extra.id] = ta.value.trim();
           else answers[q.id] = ta.value.trim();
           gate();
         });
@@ -396,8 +432,12 @@
     }
 
     function gate() {
-      const q = STEPS[i].q;
-      const ok = q.required === false ? true : Boolean(answers[q.id]);
+      const step = STEPS[i];
+      let ok = Boolean(answers[step.q.id]);
+      if (step.note && step.note.required) ok = ok && Boolean(answers[step.note.id]);
+      if (step.extra && answers[step.q.id] === step.extra.showWhen.value) {
+        ok = ok && Boolean(answers[step.extra.id]);
+      }
       document.getElementById("next").disabled = !ok;
     }
 
@@ -413,7 +453,7 @@
             <article class="card">
               <div class="done show">
                 <h2>That’s it.</h2>
-                <p>Thanks for the check-in. We’ll keep delivery tight — and we’ll be in touch if you asked us to.</p>
+                <p>${CHECKIN.thanksCopy(answers)}</p>
                 <p><a href="index.html">Back to variations</a></p>
               </div>
             </article>
